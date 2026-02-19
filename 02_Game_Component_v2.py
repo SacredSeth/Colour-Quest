@@ -161,7 +161,8 @@ class Play:
         # create four buttons in 2 x 2 grid
         for item in range(0, 4):
             self.colour_button = Button(self.colour_frame, font=body_font,
-                                        text="Colour Name", width=15)
+                                        text="Colour Name", width=15,
+                                        command=partial(self.round_results, item))
             self.colour_button.grid(row=item // 2,
                                     column=item % 2,
                                     padx=5, pady=5)
@@ -189,6 +190,11 @@ class Play:
             make_control_button.grid(row=item[5], column=item[6], padx=5, pady=5)
 
             control_ref_list.append(make_control_button)
+
+        # retrieve next, stats and end button so that they can be configured
+        self.next_button = control_ref_list[0]
+        self.stats_button = control_ref_list[2]
+        self.end_game_button = control_ref_list[3]
 
         # Once interface has been created, invoke new
         # round function for first round
@@ -227,6 +233,36 @@ class Play:
             item.config(fg=self.round_colour_list[count][2],
                         bg=self.round_colour_list[count][0],
                         text=self.round_colour_list[count][0], state=NORMAL)
+
+        self.next_button.config(state=DISABLED)
+
+
+    def round_results(self, user_choice):
+        """
+        Retrieves which button was pushed (index 0 - 3), retrieves
+        score and then compares it with median, updates results
+        and adds results to stats list.
+        :param user_choice:
+        :return:
+        """
+
+        # get user score and colour based on button press
+        score = int(self.round_colour_list[user_choice][1])
+
+        # alternate way to get button name. Good for if buttons have been scrambled
+        colour_name = self.colour_button_ref[user_choice].cget('text')
+
+        # get target score and compare with user score to find round result
+        target = self.target_score.get()
+
+        if score >= target:
+            result_text = f"Success! {colour_name} earned you {score} points"
+            result_bg = "#82B366"
+        else:
+            result_text = f"Oops {colour_name} ({score}) is less than the target."
+            result_bg = "#F8CECC"
+
+        self.results_label.config(text=result_text, bg=result_bg)
 
 
     def close_play(self):
